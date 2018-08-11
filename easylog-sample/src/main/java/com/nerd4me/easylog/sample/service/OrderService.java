@@ -19,9 +19,8 @@ public class OrderService {
     @EasyLog(topic = "order", name = "create", result = "#result",
             extra = "{orderId: #orderInfo.orderId, buyerNick: #orderInfo.buyerNick}",
             errorHandler = CustomizedErrorHandler.class)
-    public boolean create(OrderInfo orderInfo) {
+    public void create(OrderInfo orderInfo) {
         checkArgument(!Strings.isNullOrEmpty(orderInfo.getBuyerNick()), "invalid buyer nick");
         log.info("order: {} created.", orderInfo);
-        return true;
     }
 }

@@ -35,7 +35,7 @@ public class OrderServiceTest {
             orderService.create(
                     OrderInfo.builder()
                             .orderId(1234030030L)
-                            .buyerNick("")
+                            .buyerNick("Nerd4me")
                             .itemName("《世界大战》")
                             .build()
             );
