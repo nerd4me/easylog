@@ -28,16 +28,20 @@ public class OrderServiceTest {
 
     @Test
     public void testCreate() throws InterruptedException {
-        bizLogStream.log()
-                .subscribe(bizLog -> log.info("topic: {}, name: {}, content: {}",
-                        bizLog.getTopic(), bizLog.getName(), bizLog.getContent()));
-        orderService.create(
-                OrderInfo.builder()
-                        .orderId(1234030030L)
-                        .buyerNick("Nerd4me")
-                        .itemName("《世界大战》")
-                        .build()
-        );
-        TimeUnit.SECONDS.sleep(1);
+        try {
+            bizLogStream.log()
+                    .subscribe(bizLog -> log.info("topic: {}, name: {}, content: {}",
+                            bizLog.getTopic(), bizLog.getName(), bizLog.getContent()));
+            orderService.create(
+                    OrderInfo.builder()
+                            .orderId(1234030030L)
+                            .buyerNick("")
+                            .itemName("《世界大战》")
+                            .build()
+            );
+        } catch (Exception e) {
+            log.error("create order failed.", e);
+        }
+        TimeUnit.SECONDS.sleep(30);
     }
 }

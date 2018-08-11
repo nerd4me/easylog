@@ -8,6 +8,7 @@ import com.nerd4me.easylog.handler.ErrorHandler;
 import com.nerd4me.easylog.spel.EasyLogExpressionEvaluator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.expression.EvaluationContext;
@@ -71,9 +72,11 @@ public class SpelEvaluableBizLog implements BizLog {
     private Map<String, Object> computeResult() {
         Map<String, Object> result = Maps.newHashMap();
         if(businessException != null) {
-            ErrorHandler<?> errorHandler = errorHandlerCache.computeIfAbsent(easyLogAttribute.getErrorHandler(), BeanUtils::instantiateClass);
-            result.put(Constants.RESULT_KEY, errorHandler.handler(businessException));
-            result.put(Constants.ERR_MSG_KEY, businessException.getMessage());
+            ErrorHandler errorHandler = errorHandlerCache.computeIfAbsent(easyLogAttribute.getErrorHandler(), BeanUtils::instantiateClass);
+            Pair<String, String> codeMsg = errorHandler.handler(businessException);
+            result.put(Constants.RESULT_KEY, Constants.RESULT_FAILED);
+            result.put(Constants.ERR_CODE_KEY, codeMsg.getLeft());
+            result.put(Constants.ERR_MSG_KEY, codeMsg.getRight());
         } else if(!Strings.isNullOrEmpty(easyLogAttribute.getResult())) {
             result.put(
                     Constants.RESULT_KEY,
