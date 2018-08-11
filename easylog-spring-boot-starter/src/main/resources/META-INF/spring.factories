@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    com.nerd4me.easylog.autoconfig.EasyLogAutoConfiguration
