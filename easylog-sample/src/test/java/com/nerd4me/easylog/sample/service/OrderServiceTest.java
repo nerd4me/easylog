@@ -10,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Flux;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author yondy
  * @version 2018/08/11.
@@ -25,16 +27,17 @@ public class OrderServiceTest {
     private Flux<BizLog> bizLogStream;
 
     @Test
-    public void testCreate() {
+    public void testCreate() throws InterruptedException {
         bizLogStream.log()
                 .subscribe(bizLog -> log.info("topic: {}, name: {}, content: {}",
                         bizLog.getTopic(), bizLog.getName(), bizLog.getContent()));
         orderService.create(
                 OrderInfo.builder()
                         .orderId(1234030030L)
-                        .buyerNick("")
-                        .itemName("面")
+                        .buyerNick("Nerd4me")
+                        .itemName("《世界大战》")
                         .build()
         );
+        TimeUnit.SECONDS.sleep(1);
     }
 }
