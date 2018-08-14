@@ -60,6 +60,6 @@ public abstract class EasyLogConfiguration {
             } catch (Throwable throwable) {
                 sink.error(throwable);
             }
-        }).subscribeOn(Schedulers.single());
+        }).publishOn(Schedulers.single());
     }
 }

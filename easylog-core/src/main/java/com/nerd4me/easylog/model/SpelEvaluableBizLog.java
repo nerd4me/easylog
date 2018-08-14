@@ -8,12 +8,17 @@ import com.nerd4me.easylog.handler.ErrorHandler;
 import com.nerd4me.easylog.spel.EasyLogExpressionEvaluator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.util.ClassUtils;
 
 import java.util.Map;
 import java.util.Optional;
+
+import static com.nerd4me.easylog.common.Constants.RESULT_FAILED;
+import static com.nerd4me.easylog.common.Constants.RESULT_SUCCESS;
 
 /**
  * @author yondy
@@ -71,14 +76,22 @@ public class SpelEvaluableBizLog implements BizLog {
     private Map<String, Object> computeResult() {
         Map<String, Object> result = Maps.newHashMap();
         if(businessException != null) {
-            ErrorHandler<?> errorHandler = errorHandlerCache.computeIfAbsent(easyLogAttribute.getErrorHandler(), BeanUtils::instantiateClass);
-            result.put(Constants.RESULT_KEY, errorHandler.handler(businessException));
-            result.put(Constants.ERR_MSG_KEY, businessException.getMessage());
+            ErrorHandler errorHandler = errorHandlerCache.computeIfAbsent(easyLogAttribute.getErrorHandler(), BeanUtils::instantiateClass);
+            Pair<String, String> codeMsg = errorHandler.handler(businessException);
+            result.put(Constants.RESULT_KEY, RESULT_FAILED);
+            result.put(Constants.ERR_CODE_KEY, codeMsg.getLeft());
+            result.put(Constants.ERR_MSG_KEY, codeMsg.getRight());
         } else if(!Strings.isNullOrEmpty(easyLogAttribute.getResult())) {
-            result.put(
-                    Constants.RESULT_KEY,
-                    easyLogExpressionEvaluator.eval(elementKey, easyLogAttribute.getResult(), evaluationContext, Object.class)
-            );
+            Object resultValue = Optional.ofNullable(easyLogExpressionEvaluator.eval(elementKey, easyLogAttribute.getResult(), evaluationContext, Object.class))
+                    .map(val -> {
+                        if(ClassUtils.isAssignableValue(Boolean.class, val)) {
+                            return (Boolean) val ? RESULT_SUCCESS : RESULT_FAILED;
+                        } else {
+                            return val;
+                        }
+                    })
+                    .orElse(RESULT_SUCCESS);
+            result.put(Constants.RESULT_KEY, resultValue);
         }
         return result;
     }
